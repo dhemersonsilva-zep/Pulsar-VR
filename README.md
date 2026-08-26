@@ -1,22 +1,14 @@
-# Gamer House Vibes
+# Pulsar VR
 
-da uma olhada nesse site ai, que que vc acha, oq mudaria pra minha nova loja que vou criar de gamer house
+Site da Pulsar VR — arena gamer com VR, PS5 e PC Gamer em Guarapuava/PR. Reservas, loja, squads/impérios e ranking, com pagamento via Mercado Pago (Pix/cartão) e backend em Supabase.
 
-This project was built with [Lovable](https://lovable.dev).
+## Deploy
 
-**Live app**: https://realm-refuge-rig.lovable.app
+Hospedado na [Netlify](https://www.netlify.com/), com deploy automático a cada push na branch `master` deste repositório (veja `netlify.toml`).
 
-## Build with Lovable
+## Desenvolvimento
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/467415d3-934c-4e89-aaf1-aa4313f203a0).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Você precisa de Node.js e npm — [instale com nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
 git clone <this-repository-url>
@@ -24,3 +16,5 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+Copie `.env.example` para `.env` e preencha as chaves do Supabase e do Mercado Pago antes de rodar localmente.
