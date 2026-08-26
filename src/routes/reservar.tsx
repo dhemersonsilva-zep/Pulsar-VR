@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { GrupoLinkPicker, type GrupoSelecionado } from "@/components/site/GrupoLinkPicker";
 import { criarPagamentoReserva } from "@/lib/checkout.functions";
 import { getDisponibilidadeDia, type StatusHorario } from "@/lib/disponibilidade.functions";
 import { horarios, precoBRL, stations, whatsappLink } from "@/lib/pulsar-data";
@@ -63,6 +64,7 @@ function Reservar() {
   const [hora, setHora] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [grupo, setGrupo] = useState<GrupoSelecionado | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
 
@@ -105,6 +107,7 @@ function Reservar() {
           duracao,
           pessoas,
           totalCentavos: Math.round(total * 100),
+          ...(grupo ? { grupoId: grupo.id } : {}),
         },
       });
       window.location.href = initPoint;
@@ -334,6 +337,13 @@ function Reservar() {
                 placeholder="(42) 9XXXX-XXXX"
                 className="w-full border border-input bg-card p-3 text-sm outline-none focus:border-neon-cyan"
               />
+            </div>
+
+            <div>
+              <span className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">
+                Essa reserva conta pra algum squad ou império? (opcional)
+              </span>
+              <GrupoLinkPicker value={grupo} onChange={setGrupo} />
             </div>
           </div>
         )}

@@ -13,7 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as LojaRouteImport } from './routes/loja'
 import { Route as PagamentoRouteImport } from './routes/pagamento'
+import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as ReservarRouteImport } from './routes/reservar'
+import { Route as ImperiosSlugRouteImport } from './routes/imperios/$slug'
+import { Route as ImperiosNovoRouteImport } from './routes/imperios/novo'
+import { Route as SquadsSlugRouteImport } from './routes/squads/$slug'
+import { Route as SquadsNovoRouteImport } from './routes/squads/novo'
 import { Route as ApiPublicMercadopagoWebhookRouteImport } from './routes/api/public/mercadopago-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -36,9 +41,34 @@ const PagamentoRoute = PagamentoRouteImport.update({
   path: '/pagamento',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RankingRoute = RankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReservarRoute = ReservarRouteImport.update({
   id: '/reservar',
   path: '/reservar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImperiosSlugRoute = ImperiosSlugRouteImport.update({
+  id: '/imperios/$slug',
+  path: '/imperios/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImperiosNovoRoute = ImperiosNovoRouteImport.update({
+  id: '/imperios/novo',
+  path: '/imperios/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SquadsSlugRoute = SquadsSlugRouteImport.update({
+  id: '/squads/$slug',
+  path: '/squads/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SquadsNovoRoute = SquadsNovoRouteImport.update({
+  id: '/squads/novo',
+  path: '/squads/novo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicMercadopagoWebhookRoute =
@@ -53,7 +83,12 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/loja': typeof LojaRoute
   '/pagamento': typeof PagamentoRoute
+  '/ranking': typeof RankingRoute
   '/reservar': typeof ReservarRoute
+  '/imperios/$slug': typeof ImperiosSlugRoute
+  '/imperios/novo': typeof ImperiosNovoRoute
+  '/squads/$slug': typeof SquadsSlugRoute
+  '/squads/novo': typeof SquadsNovoRoute
   '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -61,7 +96,12 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/loja': typeof LojaRoute
   '/pagamento': typeof PagamentoRoute
+  '/ranking': typeof RankingRoute
   '/reservar': typeof ReservarRoute
+  '/imperios/$slug': typeof ImperiosSlugRoute
+  '/imperios/novo': typeof ImperiosNovoRoute
+  '/squads/$slug': typeof SquadsSlugRoute
+  '/squads/novo': typeof SquadsNovoRoute
   '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRoutesById {
@@ -70,7 +110,12 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/loja': typeof LojaRoute
   '/pagamento': typeof PagamentoRoute
+  '/ranking': typeof RankingRoute
   '/reservar': typeof ReservarRoute
+  '/imperios/$slug': typeof ImperiosSlugRoute
+  '/imperios/novo': typeof ImperiosNovoRoute
+  '/squads/$slug': typeof SquadsSlugRoute
+  '/squads/novo': typeof SquadsNovoRoute
   '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRouteTypes {
@@ -80,7 +125,12 @@ export interface FileRouteTypes {
     | '/contato'
     | '/loja'
     | '/pagamento'
+    | '/ranking'
     | '/reservar'
+    | '/imperios/$slug'
+    | '/imperios/novo'
+    | '/squads/$slug'
+    | '/squads/novo'
     | '/api/public/mercadopago-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,7 +138,12 @@ export interface FileRouteTypes {
     | '/contato'
     | '/loja'
     | '/pagamento'
+    | '/ranking'
     | '/reservar'
+    | '/imperios/$slug'
+    | '/imperios/novo'
+    | '/squads/$slug'
+    | '/squads/novo'
     | '/api/public/mercadopago-webhook'
   id:
     | '__root__'
@@ -96,7 +151,12 @@ export interface FileRouteTypes {
     | '/contato'
     | '/loja'
     | '/pagamento'
+    | '/ranking'
     | '/reservar'
+    | '/imperios/$slug'
+    | '/imperios/novo'
+    | '/squads/$slug'
+    | '/squads/novo'
     | '/api/public/mercadopago-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -105,7 +165,12 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   LojaRoute: typeof LojaRoute
   PagamentoRoute: typeof PagamentoRoute
+  RankingRoute: typeof RankingRoute
   ReservarRoute: typeof ReservarRoute
+  ImperiosSlugRoute: typeof ImperiosSlugRoute
+  ImperiosNovoRoute: typeof ImperiosNovoRoute
+  SquadsSlugRoute: typeof SquadsSlugRoute
+  SquadsNovoRoute: typeof SquadsNovoRoute
   ApiPublicMercadopagoWebhookRoute: typeof ApiPublicMercadopagoWebhookRoute
 }
 
@@ -139,11 +204,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ranking': {
+      id: '/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof RankingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reservar': {
       id: '/reservar'
       path: '/reservar'
       fullPath: '/reservar'
       preLoaderRoute: typeof ReservarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imperios/$slug': {
+      id: '/imperios/$slug'
+      path: '/imperios/$slug'
+      fullPath: '/imperios/$slug'
+      preLoaderRoute: typeof ImperiosSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imperios/novo': {
+      id: '/imperios/novo'
+      path: '/imperios/novo'
+      fullPath: '/imperios/novo'
+      preLoaderRoute: typeof ImperiosNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/squads/$slug': {
+      id: '/squads/$slug'
+      path: '/squads/$slug'
+      fullPath: '/squads/$slug'
+      preLoaderRoute: typeof SquadsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/squads/novo': {
+      id: '/squads/novo'
+      path: '/squads/novo'
+      fullPath: '/squads/novo'
+      preLoaderRoute: typeof SquadsNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/mercadopago-webhook': {
@@ -161,7 +261,12 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   LojaRoute: LojaRoute,
   PagamentoRoute: PagamentoRoute,
+  RankingRoute: RankingRoute,
   ReservarRoute: ReservarRoute,
+  ImperiosSlugRoute: ImperiosSlugRoute,
+  ImperiosNovoRoute: ImperiosNovoRoute,
+  SquadsSlugRoute: SquadsSlugRoute,
+  SquadsNovoRoute: SquadsNovoRoute,
   ApiPublicMercadopagoWebhookRoute: ApiPublicMercadopagoWebhookRoute,
 }
 export const routeTree = rootRouteImport

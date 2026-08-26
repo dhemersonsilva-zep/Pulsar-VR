@@ -57,6 +57,7 @@ export type Database = {
           duracao_horas: number;
           estacao_id: string;
           estacao_nome: string;
+          grupo_id: string | null;
           hora: string;
           id: string;
           mp_payment_id: string | null;
@@ -75,6 +76,7 @@ export type Database = {
           duracao_horas?: number;
           estacao_id: string;
           estacao_nome: string;
+          grupo_id?: string | null;
           hora: string;
           id?: string;
           mp_payment_id?: string | null;
@@ -93,6 +95,7 @@ export type Database = {
           duracao_horas?: number;
           estacao_id?: string;
           estacao_nome?: string;
+          grupo_id?: string | null;
           hora?: string;
           id?: string;
           mp_payment_id?: string | null;
@@ -100,6 +103,59 @@ export type Database = {
           pessoas?: number;
           status?: string;
           total_centavos?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reservas_grupo_id_fkey";
+            columns: ["grupo_id"];
+            isOneToOne: false;
+            referencedRelation: "grupos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      grupos: {
+        Row: {
+          banner_path: string | null;
+          created_at: string;
+          edit_key_hash: string;
+          id: string;
+          jogos_realizados: number;
+          nome: string;
+          slug: string;
+          tamanho: number;
+          telefone_criador: string;
+          tipo: string;
+          total_minutos_jogados: number;
+          updated_at: string;
+        };
+        Insert: {
+          banner_path?: string | null;
+          created_at?: string;
+          edit_key_hash: string;
+          id?: string;
+          jogos_realizados?: number;
+          nome: string;
+          slug: string;
+          tamanho?: number;
+          telefone_criador: string;
+          tipo: string;
+          total_minutos_jogados?: number;
+          updated_at?: string;
+        };
+        Update: {
+          banner_path?: string | null;
+          created_at?: string;
+          edit_key_hash?: string;
+          id?: string;
+          jogos_realizados?: number;
+          nome?: string;
+          slug?: string;
+          tamanho?: number;
+          telefone_criador?: string;
+          tipo?: string;
+          total_minutos_jogados?: number;
           updated_at?: string;
         };
         Relationships: [];

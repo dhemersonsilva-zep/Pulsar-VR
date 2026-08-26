@@ -12,6 +12,7 @@ const reservaSchema = z.object({
   duracao: z.number().int().min(1).max(6),
   pessoas: z.number().int().min(1).max(8),
   totalCentavos: z.number().int().min(100).max(500000),
+  grupoId: z.string().uuid().optional(),
 });
 
 const pedidoSchema = z.object({
@@ -124,6 +125,7 @@ export const criarPagamentoReserva = createServerFn({ method: "POST" })
         duracao_horas: data.duracao,
         pessoas: data.pessoas,
         total_centavos: data.totalCentavos,
+        grupo_id: data.grupoId ?? null,
       })
       .select("id")
       .single();
