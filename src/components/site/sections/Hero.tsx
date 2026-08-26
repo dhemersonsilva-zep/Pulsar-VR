@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import heroLounge from "@/assets/hero-lounge.jpg";
 import { Starfield } from "@/components/site/Starfield";
+import { SpaceshipField } from "@/components/site/SpaceshipField";
 
 const STEPS = ["eyebrow", "title", "subtitle", "actions"] as const;
 
@@ -33,6 +34,7 @@ export function Hero() {
         <div className="absolute inset-0 bg-void opacity-95" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/80" />
         <Starfield />
+        <SpaceshipField />
         <div className="bg-grid absolute inset-0 opacity-40" />
         <div className="halo-cyan absolute left-1/2 top-1/2 size-[700px] -translate-x-1/2 -translate-y-1/2" />
       </div>

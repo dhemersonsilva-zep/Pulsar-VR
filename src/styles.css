@@ -65,6 +65,13 @@
   --neon-orange: oklch(0.72 0.208 47);
   --whatsapp: oklch(0.78 0.19 149);
 
+  /* Paleta das naves do hero (ver SpaceshipField.tsx) */
+  --ship-red: oklch(0.58 0.22 27);
+  --ship-red-glow: oklch(0.68 0.22 27);
+  --ship-blue: oklch(0.32 0.09 260);
+  --ship-blue-glow: oklch(0.62 0.19 255);
+  --ship-purple-glow: oklch(0.68 0.22 311);
+
   --primary: var(--neon-cyan);
   --primary-foreground: oklch(0.12 0.014 279);
   --secondary: oklch(0.22 0.02 279);
@@ -291,6 +298,49 @@
 
 @utility animate-pulse-soft {
   animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
+/* --- naves do hero (ver Spaceship.tsx / SpaceshipField.tsx) --- */
+@keyframes fly-right {
+  0% {
+    transform: translateX(-15vw) translateY(0) rotate(var(--ship-tilt, -3deg));
+    opacity: 0;
+  }
+  8% {
+    opacity: var(--ship-opacity, 0.8);
+  }
+  90% {
+    opacity: var(--ship-opacity, 0.8);
+  }
+  100% {
+    transform: translateX(115vw) translateY(-4vh) rotate(var(--ship-tilt, -3deg));
+    opacity: 0;
+  }
+}
+
+@keyframes fly-left {
+  0% {
+    transform: translateX(115vw) translateY(0) rotate(var(--ship-tilt, 180deg));
+    opacity: 0;
+  }
+  8% {
+    opacity: var(--ship-opacity, 0.8);
+  }
+  90% {
+    opacity: var(--ship-opacity, 0.8);
+  }
+  100% {
+    transform: translateX(-15vw) translateY(3vh) rotate(var(--ship-tilt, 180deg));
+    opacity: 0;
+  }
+}
+
+@utility animate-fly-right {
+  animation: fly-right linear infinite;
+}
+
+@utility animate-fly-left {
+  animation: fly-left linear infinite;
 }
 
 @keyframes scan-y {
