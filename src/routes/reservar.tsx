@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { PixelDecor, PixelGamepad, PixelMolecule, PixelMouse } from "@/components/site/PixelDecor";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { Check, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { criarPagamentoReserva } from "@/lib/checkout.functions";
+import { getDisponibilidadeDia, type StatusHorario } from "@/lib/disponibilidade.functions";
 import { horarios, precoBRL, stations, whatsappLink } from "@/lib/pulsar-data";
-
 
 export const Route = createFileRoute("/reservar")({
   validateSearch: (search: Record<string, unknown>): { estacao?: string } => {
@@ -23,35 +25,70 @@ export const Route = createFileRoute("/reservar")({
       { property: "og:title", content: "Reserve sua estação | Pulsar VR" },
       {
         property: "og:description",
-        content:
-          "Escolha a estação, o dia e o horário e garanta seu lugar na Pulsar VR.",
+        content: "Escolha a estação, o dia e o horário e garanta seu lugar na Pulsar VR.",
       },
     ],
   }),
   component: Reservar,
 });
 
+const ETAPAS = ["Estação", "Jogadores", "Data", "Horário", "Resumo", "Pagamento"] as const;
+
+const STATUS_LABEL: Record<StatusHorario, string> = {
+  disponivel: "DISPONÍVEL",
+  poucas_vagas: "POUCAS VAGAS",
+  lotado: "LOTADO",
+};
+
+function dataISO(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+}
+
+function dataBR(iso: string) {
+  const [ano, mes, dia] = iso.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
 function Reservar() {
   const { estacao } = Route.useSearch();
   const padrao = stations[0]!;
+
+  const [passo, setPasso] = useState(0);
   const [stationId, setStationId] = useState(estacao ?? padrao.id);
-  const [data, setData] = useState("");
-  const [hora, setHora] = useState(horarios[4]!);
-  const [duracao, setDuracao] = useState(1);
   const [pessoas, setPessoas] = useState(1);
+  const [duracao, setDuracao] = useState(1);
+  const [diaSelecionado, setDiaSelecionado] = useState<Date | undefined>(undefined);
+  const [hora, setHora] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
-
-  const station = stations.find((s) => s.id === stationId) ?? padrao;
-  const total = station.precoHora * duracao * pessoas;
-
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
+
+  const station = stations.find((s) => s.id === stationId) ?? padrao;
+  const data = diaSelecionado ? dataISO(diaSelecionado) : "";
+  const total = station.precoHora * duracao * pessoas;
+
+  const buscarDisponibilidade = useServerFn(getDisponibilidadeDia);
+  const { data: disponibilidade, isLoading: carregandoHorarios } = useQuery({
+    queryKey: ["disponibilidade", data],
+    queryFn: () => buscarDisponibilidade({ data: { data } }),
+    enabled: passo === 3 && !!data,
+  });
+
   const pagar = useServerFn(criarPagamentoReserva);
+
+  const podeAvancar = useMemo(() => {
+    if (passo === 2) return !!diaSelecionado;
+    if (passo === 3) return !!hora;
+    if (passo === 4) return nome.trim().length >= 2 && telefone.trim().length >= 8;
+    return true;
+  }, [passo, diaSelecionado, hora, nome, telefone]);
 
   async function pagarReserva() {
     setErro(null);
-    if (!data) return setErro("Escolha a data da reserva.");
+    if (!data || !hora) return setErro("Escolha a data e o horário da reserva.");
     if (nome.trim().length < 2) return setErro("Informe seu nome.");
     if (telefone.trim().length < 8) return setErro("Informe seu telefone.");
 
@@ -78,13 +115,10 @@ function Reservar() {
     }
   }
 
-
-
-
   const mensagem = [
     "Olá! Quero reservar na Pulsar VR:",
     `Estação: ${station.nome}`,
-    `Data: ${data || "(a combinar)"} às ${hora}`,
+    `Data: ${data ? dataBR(data) : "(a combinar)"} às ${hora ?? "(a combinar)"}`,
     `Duração: ${duracao}h · Pessoas: ${pessoas}`,
     `Total: ${precoBRL(total)}`,
     nome ? `Nome: ${nome}` : "",
@@ -93,135 +127,198 @@ function Reservar() {
     .filter(Boolean)
     .join("\n");
 
+  function proximo() {
+    if (!podeAvancar) return;
+    setErro(null);
+    setPasso((p) => Math.min(ETAPAS.length - 1, p + 1));
+  }
+
+  function voltar() {
+    setErro(null);
+    setPasso((p) => Math.max(0, p - 1));
+  }
+
   return (
-    <main className="relative mx-auto max-w-7xl overflow-hidden px-6 pb-24 pt-32">
-      <PixelDecor
-        items={[
-          { icon: PixelGamepad, className: "right-[3%] top-[10%] w-[60px] h-[32px] text-neon-cyan", duration: "10s", opacity: 0.24 },
-          { icon: PixelMolecule, className: "right-[9%] top-[22%] w-11 h-10 text-neon-purple", duration: "13s", delay: "0.3s", opacity: 0.22 },
-          { icon: PixelMolecule, className: "right-[32%] top-[16%] w-9 h-8 text-neon-pink", duration: "16s", delay: "1.4s", drift: true, opacity: 0.2 },
-          { icon: PixelMouse, className: "right-[46%] top-[13%] w-[30px] h-[38px] text-neon-orange", duration: "12s", delay: "0.6s", drift: true, opacity: 0.24 },
-          { icon: PixelMolecule, className: "left-[3%] bottom-[1%] w-[52px] h-[48px] text-neon-cyan", duration: "14s", delay: "2.2s", opacity: 0.22 },
-          { icon: PixelMolecule, className: "right-[3%] bottom-[3%] w-11 h-10 text-neon-green", duration: "11s", delay: "0.8s", drift: true, opacity: 0.2 },
-          { icon: PixelMouse, className: "right-[16%] bottom-[2%] w-[26px] h-[34px] text-neon-pink", duration: "13s", delay: "1.6s", opacity: 0.24 },
-          { icon: PixelGamepad, className: "left-[16%] bottom-[1%] w-[46px] h-[25px] text-neon-purple", duration: "15s", delay: "0.9s", drift: true, opacity: 0.24 },
-        ]}
-      />
+    <main className="relative mx-auto max-w-3xl overflow-hidden px-6 pb-24 pt-32">
       <h1 className="font-display text-4xl font-black">
         RESERVE SUA <span className="text-neon-cyan">ESTAÇÃO</span>
       </h1>
-      <p className="mt-3 max-w-2xl text-muted-foreground">
-        Escolha a estação, o dia e o horário. Confirmamos sua reserva no
-        WhatsApp em minutos.
+      <p className="mt-3 text-muted-foreground">
+        Escolha a estação, o dia e o horário. Confirmamos sua reserva no WhatsApp em minutos.
       </p>
 
-      <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-10">
-          {/* Estação */}
-          <div>
-            <h2 className="mb-4 font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              1. Estação
-            </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {stations.map((s) => (
+      {/* Indicador de etapas */}
+      <ol className="mt-10 flex items-center gap-1 sm:gap-2">
+        {ETAPAS.map((etapa, i) => (
+          <li key={etapa} className="flex flex-1 items-center gap-1 sm:gap-2">
+            <div
+              className={`flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition-colors sm:size-8 ${
+                i < passo
+                  ? "border-neon-cyan bg-neon-cyan text-primary-foreground"
+                  : i === passo
+                    ? "border-neon-cyan text-neon-cyan"
+                    : "border-border text-muted-foreground"
+              }`}
+            >
+              {i < passo ? <Check className="size-3.5" /> : i + 1}
+            </div>
+            {i < ETAPAS.length - 1 && (
+              <div className={`h-px flex-1 ${i < passo ? "bg-neon-cyan" : "bg-border"}`} />
+            )}
+          </li>
+        ))}
+      </ol>
+      <p className="mt-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        Etapa {passo + 1} de {ETAPAS.length} · {ETAPAS[passo]}
+      </p>
+
+      <div className="glass-panel mt-8 min-h-[360px] p-6 sm:p-8">
+        {passo === 0 && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {stations.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setStationId(s.id)}
+                className={`glass-card p-4 text-left transition-all ${
+                  s.id === stationId
+                    ? "border-neon-cyan shadow-[0_0_20px_color-mix(in_oklab,var(--neon-cyan)_25%,transparent)]"
+                    : "hover:border-neon-cyan/40"
+                }`}
+              >
+                <span className="block font-display text-sm font-bold">{s.nome}</span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  {precoBRL(s.precoHora)}/h
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {passo === 1 && (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+            <div>
+              <span className="mb-3 block text-xs uppercase tracking-widest text-muted-foreground">
+                Quantas pessoas?
+              </span>
+              <div className="flex items-center gap-4">
                 <button
-                  key={s.id}
                   type="button"
-                  onClick={() => setStationId(s.id)}
-                  className={`glass-card p-4 text-left transition-all ${
-                    s.id === stationId
-                      ? "border-neon-cyan shadow-[0_0_20px_color-mix(in_oklab,var(--neon-cyan)_25%,transparent)]"
-                      : "hover:border-neon-cyan/40"
-                  }`}
+                  aria-label="Diminuir pessoas"
+                  onClick={() => setPessoas((p) => Math.max(1, p - 1))}
+                  className="flex size-10 items-center justify-center border border-border transition-colors hover:border-neon-cyan"
                 >
-                  <span className="block font-display text-sm font-bold">
-                    {s.nome}
-                  </span>
-                  <span className="mt-1 block text-xs text-muted-foreground">
-                    {precoBRL(s.precoHora)}/h
-                  </span>
+                  <Minus className="size-4" />
                 </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Data e duração */}
-          <div>
-            <h2 className="mb-4 font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              2. Dia, duração e pessoas
-            </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <label className="block text-sm">
-                <span className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">
-                  Data
-                </span>
-                <input
-                  type="date"
-                  value={data}
-                  onChange={(e) => setData(e.target.value)}
-                  className="w-full border border-input bg-card p-3 text-sm outline-none focus:border-neon-cyan"
-                />
-              </label>
-              <label className="block text-sm">
-                <span className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">
-                  Duração
-                </span>
-                <select
-                  value={duracao}
-                  onChange={(e) => setDuracao(Number(e.target.value))}
-                  className="w-full border border-input bg-card p-3 text-sm outline-none focus:border-neon-cyan"
-                >
-                  <option value={1}>1 hora</option>
-                  <option value={2}>2 horas</option>
-                  <option value={3}>3 horas</option>
-                </select>
-              </label>
-              <label className="block text-sm">
-                <span className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">
-                  Pessoas
-                </span>
-                <input
-                  type="number"
-                  min={1}
-                  max={8}
-                  value={pessoas}
-                  onChange={(e) =>
-                    setPessoas(Math.min(8, Math.max(1, Number(e.target.value))))
-                  }
-                  className="w-full border border-input bg-card p-3 text-sm outline-none focus:border-neon-cyan"
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* Horário */}
-          <div>
-            <h2 className="mb-4 font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              3. Horário
-            </h2>
-            <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-8">
-              {horarios.map((h) => (
+                <span className="w-10 text-center font-display text-2xl font-bold">{pessoas}</span>
                 <button
-                  key={h}
                   type="button"
-                  onClick={() => setHora(h)}
-                  className={`h-12 border text-xs font-medium transition-all ${
-                    h === hora
-                      ? "border-neon-cyan bg-neon-cyan/10 text-neon-cyan"
-                      : "border-border text-muted-foreground hover:bg-card"
-                  }`}
+                  aria-label="Aumentar pessoas"
+                  onClick={() => setPessoas((p) => Math.min(8, p + 1))}
+                  className="flex size-10 items-center justify-center border border-border transition-colors hover:border-neon-cyan"
                 >
-                  {h}
+                  <Plus className="size-4" />
                 </button>
-              ))}
+              </div>
+            </div>
+            <div>
+              <span className="mb-3 block text-xs uppercase tracking-widest text-muted-foreground">
+                Duração
+              </span>
+              <div className="flex gap-2">
+                {[1, 2, 3].map((h) => (
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => setDuracao(h)}
+                    className={`flex-1 border py-3 text-sm font-medium transition-all ${
+                      duracao === h
+                        ? "border-neon-cyan bg-neon-cyan/10 text-neon-cyan"
+                        : "border-border text-muted-foreground hover:border-neon-cyan/40"
+                    }`}
+                  >
+                    {h}h
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Contato */}
+        {passo === 2 && (
+          <div className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={diaSelecionado}
+              onSelect={setDiaSelecionado}
+              disabled={{ before: new Date() }}
+              className="glass-card"
+            />
+          </div>
+        )}
+
+        {passo === 3 && (
           <div>
-            <h2 className="mb-4 font-display text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              4. Seus dados
-            </h2>
+            {!data && (
+              <p className="text-sm text-muted-foreground">Volte e escolha uma data primeiro.</p>
+            )}
+            {data && carregandoHorarios && (
+              <p className="text-sm text-muted-foreground">Carregando horários…</p>
+            )}
+            {data && !carregandoHorarios && (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {horarios.map((h) => {
+                  const status = disponibilidade?.[station.id]?.[h] ?? "disponivel";
+                  const lotado = status === "lotado";
+                  return (
+                    <button
+                      key={h}
+                      type="button"
+                      disabled={lotado}
+                      onClick={() => setHora(h)}
+                      className={`flex flex-col items-center gap-1 border py-3 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+                        h === hora
+                          ? "border-neon-cyan bg-neon-cyan/10 text-neon-cyan"
+                          : "border-border text-muted-foreground hover:enabled:border-neon-cyan/40"
+                      }`}
+                    >
+                      <span className="font-display text-sm">{h}</span>
+                      <span className="text-[10px]">{STATUS_LABEL[status]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {passo === 4 && (
+          <div className="space-y-8">
+            <dl className="space-y-3 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Estação</dt>
+                <dd>{station.nome}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Data e hora</dt>
+                <dd>
+                  {dataBR(data)} às {hora}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Duração</dt>
+                <dd>
+                  {duracao}h · {pessoas} {pessoas > 1 ? "pessoas" : "pessoa"}
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-4 border-t border-border pt-3">
+                <dt className="font-medium">Total</dt>
+                <dd className="font-display text-2xl font-bold text-neon-cyan">
+                  {precoBRL(total)}
+                </dd>
+              </div>
+            </dl>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <input
                 type="text"
@@ -239,56 +336,71 @@ function Reservar() {
               />
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Resumo */}
-        <aside className="glass-card h-fit space-y-6 p-8 lg:sticky lg:top-28">
-          <h2 className="font-display text-lg font-bold">Resumo da reserva</h2>
-          <dl className="space-y-4 text-sm">
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Estação</dt>
-              <dd>{station.nome}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Data e hora</dt>
-              <dd>{data ? `${data} às ${hora}` : `— às ${hora}`}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Duração</dt>
-              <dd>
-                {duracao}h · {pessoas} {pessoas > 1 ? "pessoas" : "pessoa"}
-              </dd>
-            </div>
-            <div className="flex items-baseline justify-between gap-4 border-t border-border pt-4">
-              <dt className="font-medium">Total</dt>
-              <dd className="font-display text-2xl font-bold text-neon-cyan">
-                {precoBRL(total)}
-              </dd>
-            </div>
-          </dl>
-          {erro && <p className="text-sm text-destructive">{erro}</p>}
+        {passo === 5 && (
+          <div className="space-y-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Confirme os dados e finalize com Pix, cartão ou boleto pelo Mercado Pago.
+            </p>
+            <p className="font-display text-3xl font-bold text-neon-cyan">{precoBRL(total)}</p>
+            {erro && <p className="text-sm text-destructive">{erro}</p>}
+            <button
+              type="button"
+              onClick={() => void pagarReserva()}
+              disabled={carregando}
+              className="btn-skew mx-auto block w-full max-w-sm bg-neon-cyan py-4 text-center font-display text-sm font-bold uppercase tracking-widest text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
+            >
+              <span className="btn-skew-inner">
+                {carregando ? "Abrindo pagamento..." : "Pagar com Pix ou cartão"}
+              </span>
+            </button>
+            <a
+              href={whatsappLink(mensagem)}
+              target="_blank"
+              rel="noreferrer"
+              className="mx-auto block max-w-sm border border-border py-4 text-center font-display text-sm font-bold uppercase tracking-widest transition-all hover:border-neon-cyan"
+            >
+              Prefiro combinar no WhatsApp
+            </a>
+            <p className="text-xs text-muted-foreground">
+              Pagamento seguro pelo Mercado Pago · Pix, cartão e boleto.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {erro && passo !== 5 && <p className="mt-4 text-sm text-destructive">{erro}</p>}
+
+      {passo < 5 && (
+        <div className="mt-8 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => void pagarReserva()}
-            disabled={carregando}
-            className="block w-full bg-neon-cyan py-4 text-center font-display text-sm font-bold uppercase tracking-widest text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
+            onClick={voltar}
+            disabled={passo === 0}
+            className="flex items-center gap-2 border border-border px-6 py-3 font-display text-xs font-bold uppercase tracking-widest transition-all hover:border-neon-cyan disabled:opacity-0"
           >
-            {carregando ? "Abrindo pagamento..." : "Pagar com Pix ou cartão"}
+            <ChevronLeft className="size-4" /> Voltar
           </button>
-          <a
-            href={whatsappLink(mensagem)}
-            target="_blank"
-            rel="noreferrer"
-            className="block border border-border py-4 text-center font-display text-sm font-bold uppercase tracking-widest transition-all hover:border-neon-cyan"
+          <button
+            type="button"
+            onClick={proximo}
+            disabled={!podeAvancar}
+            className="flex items-center gap-2 bg-neon-cyan px-8 py-3 font-display text-xs font-bold uppercase tracking-widest text-primary-foreground transition-all hover:brightness-110 disabled:opacity-40"
           >
-            Prefiro combinar no WhatsApp
-          </a>
-          <p className="text-center text-xs text-muted-foreground">
-            Pagamento seguro pelo Mercado Pago · Pix, cartão e boleto.
-          </p>
-
-        </aside>
-      </div>
+            Continuar <ChevronRight className="size-4" />
+          </button>
+        </div>
+      )}
+      {passo === 5 && (
+        <button
+          type="button"
+          onClick={voltar}
+          className="mt-8 flex items-center gap-2 border border-border px-6 py-3 font-display text-xs font-bold uppercase tracking-widest transition-all hover:border-neon-cyan"
+        >
+          <ChevronLeft className="size-4" /> Voltar
+        </button>
+      )}
     </main>
   );
 }

@@ -16,6 +16,26 @@ export function precoBRL(valor: number) {
   return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+/**
+ * Dados reais do negócio. Sem endereço de rua confirmado ainda — mantenha
+ * `enderecoCompleto: null` até ter o endereço real; a UI mostra um aviso
+ * "em breve" em vez de inventar uma rua/número.
+ */
+export const BUSINESS = {
+  nome: "Pulsar VR",
+  cidade: "Guarapuava",
+  estado: "PR",
+  enderecoCompleto: null as string | null,
+  horario: "Segunda a sábado, 14h às 23h",
+  instagram: "@pulsarvr",
+  instagramUrl: "https://instagram.com/pulsarvr",
+  telefoneExibicao: "(42) 99941-3305",
+  googleMapsBuscaUrl: "https://www.google.com/maps/search/?api=1&query=Pulsar+VR+Guarapuava+PR",
+  // Embed no nível da cidade — sem endereço exato ainda, então não fixamos um pino de rua.
+  osmEmbedUrl:
+    "https://www.openstreetmap.org/export/embed.html?bbox=-51.5245%2C-25.4235%2C-51.4245%2C-25.3535&layer=mapnik&marker=-25.3935%2C-51.4745",
+};
+
 export type Accent = "cyan" | "pink" | "green";
 
 export type Station = {
@@ -26,6 +46,13 @@ export type Station = {
   precoHora: number;
   imagem: string;
   accent: Accent;
+  /**
+   * Quantas unidades físicas existem dessa estação (headsets/consoles/PCs).
+   * PLACEHOLDER — ajuste para o número real de equipamentos; hoje assumimos
+   * 1 unidade por estação, então cada horário fica "lotado" após 1 reserva.
+   */
+  capacidade: number;
+  idadeRecomendada: string;
 };
 
 export const stations: Station[] = [
@@ -38,6 +65,8 @@ export const stations: Station[] = [
     precoHora: 69.9,
     imagem: stationVr,
     accent: "cyan",
+    capacidade: 1,
+    idadeRecomendada: "12+",
   },
   {
     id: "ps5",
@@ -48,6 +77,8 @@ export const stations: Station[] = [
     precoHora: 44.9,
     imagem: stationConsole,
     accent: "pink",
+    capacidade: 1,
+    idadeRecomendada: "Livre",
   },
   {
     id: "pc",
@@ -58,8 +89,80 @@ export const stations: Station[] = [
     precoHora: 54.9,
     imagem: stationPc,
     accent: "green",
+    capacidade: 1,
+    idadeRecomendada: "Livre",
   },
 ];
+
+/** Títulos exclusivos/típicos de cada plataforma, a partir da lista real de `jogos`. */
+export const jogosPorEstacao: Record<string, string[]> = {
+  vr: ["Beat Saber", "Half-Life: Alyx"],
+  ps5: ["EA FC 25", "Spider-Man 2", "Gran Turismo 7"],
+  pc: ["Valorant", "Counter-Strike 2", "Cyberpunk 2077"],
+};
+
+/**
+ * Pacotes calculados a partir dos preços reais por hora (nada fixo/inventado).
+ * `duracaoHoras`/`pessoas` são o cenário padrão mostrado; o preço final real
+ * sempre é calculado no fluxo de reserva. Ajuste `descontoPercent` quando o
+ * desconto de squad for definido — hoje está em 0 (sem desconto aplicado).
+ */
+export const DESCONTO_SQUAD_PERCENT = 0;
+
+export type Pacote = {
+  id: string;
+  nome: string;
+  tagline: string;
+  pessoas: number;
+  duracaoHoras: number;
+  estacaoRefId: string;
+  destaque?: boolean;
+  sobConsulta?: boolean;
+};
+
+export const pacotes: Pacote[] = [
+  {
+    id: "solo",
+    nome: "Solo",
+    tagline: "Pra jogar sozinho, no seu ritmo.",
+    pessoas: 1,
+    duracaoHoras: 1,
+    estacaoRefId: "pc",
+  },
+  {
+    id: "duo",
+    nome: "Duo",
+    tagline: "Você e mais uma pessoa, mesma estação.",
+    pessoas: 2,
+    duracaoHoras: 1,
+    estacaoRefId: "ps5",
+  },
+  {
+    id: "squad",
+    nome: "Squad",
+    tagline: "Grupos de até 4 pessoas. Melhor custo-benefício.",
+    pessoas: 4,
+    duracaoHoras: 1,
+    estacaoRefId: "ps5",
+    destaque: true,
+  },
+  {
+    id: "aniversario",
+    nome: "Aniversário",
+    tagline: "Experiência para grupos — orçamento sob consulta.",
+    pessoas: 6,
+    duracaoHoras: 2,
+    estacaoRefId: "vr",
+    sobConsulta: true,
+  },
+];
+
+export function precoPacote(pacote: Pacote) {
+  const estacao = stations.find((s) => s.id === pacote.estacaoRefId) ?? stations[0]!;
+  const bruto = estacao.precoHora * pacote.duracaoHoras * pacote.pessoas;
+  const desconto = bruto * (DESCONTO_SQUAD_PERCENT / 100);
+  return bruto - desconto;
+}
 
 export type Produto = {
   id: string;

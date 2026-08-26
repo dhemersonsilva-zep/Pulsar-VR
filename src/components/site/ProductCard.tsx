@@ -1,5 +1,6 @@
 import type { Produto } from "@/lib/pulsar-data";
 import { precoBRL, whatsappLink } from "@/lib/pulsar-data";
+import { TiltCard } from "@/components/site/TiltCard";
 
 export function ProductCard({
   produto,
@@ -9,8 +10,8 @@ export function ProductCard({
   onAdd?: (produto: Produto) => void;
 }) {
   return (
-    <div className="group">
-      <div className="glass-card relative mb-4 aspect-square overflow-hidden p-4">
+    <TiltCard className="tilt-glow group">
+      <div className="glass-card relative mb-4 aspect-square overflow-hidden p-4 transition-colors group-hover:border-neon-orange/40">
         <img
           src={produto.imagem}
           alt={produto.nome}
@@ -24,7 +25,6 @@ export function ProductCard({
             type="button"
             onClick={() => onAdd(produto)}
             className="absolute inset-x-0 bottom-0 bg-neon-orange py-3 text-center font-bold text-primary-foreground opacity-90 transition-opacity hover:opacity-100"
-
           >
             ADICIONAR
           </button>
@@ -42,7 +42,6 @@ export function ProductCard({
       <h4 className="font-medium">{produto.nome}</h4>
       <p className="text-xs text-muted-foreground">{produto.detalhe}</p>
       <p className="font-bold text-neon-orange">{precoBRL(produto.preco)}</p>
-    </div>
+    </TiltCard>
   );
 }
-

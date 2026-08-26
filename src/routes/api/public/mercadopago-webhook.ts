@@ -26,8 +26,7 @@ export const Route = createFileRoute("/api/public/mercadopago-webhook")({
         if (!token) return new Response("not configured", { status: 500 });
 
         const url = new URL(request.url);
-        let paymentId =
-          url.searchParams.get("data.id") ?? url.searchParams.get("id") ?? null;
+        let paymentId = url.searchParams.get("data.id") ?? url.searchParams.get("id") ?? null;
 
         try {
           const body = (await request.json()) as {

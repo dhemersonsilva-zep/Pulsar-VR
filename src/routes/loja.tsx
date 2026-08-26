@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
-import { PixelDecor, PixelMolecule, PixelMouse } from "@/components/site/PixelDecor";
+import { Reveal } from "@/components/site/Reveal";
 import { criarPagamentoPedido } from "@/lib/checkout.functions";
 import { precoBRL, produtos, type Produto } from "@/lib/pulsar-data";
 
@@ -18,8 +18,7 @@ export const Route = createFileRoute("/loja")({
       { property: "og:title", content: "Loja Gear | Pulsar VR" },
       {
         property: "og:description",
-        content:
-          "Mouses, teclados, headsets e mousepads com pagamento Pix ou cartão.",
+        content: "Mouses, teclados, headsets e mousepads com pagamento Pix ou cartão.",
       },
     ],
   }),
@@ -36,19 +35,14 @@ function Loja() {
   const [carregando, setCarregando] = useState(false);
   const pagar = useServerFn(criarPagamentoPedido);
 
-  const total = carrinho.reduce(
-    (soma, item) => soma + item.produto.preco * item.quantidade,
-    0,
-  );
+  const total = carrinho.reduce((soma, item) => soma + item.produto.preco * item.quantidade, 0);
 
   function adicionar(produto: Produto) {
     setCarrinho((atual) => {
       const existente = atual.find((i) => i.produto.id === produto.id);
       if (existente) {
         return atual.map((i) =>
-          i.produto.id === produto.id
-            ? { ...i, quantidade: Math.min(20, i.quantidade + 1) }
-            : i,
+          i.produto.id === produto.id ? { ...i, quantidade: Math.min(20, i.quantidade + 1) } : i,
         );
       }
       return [...atual, { produto, quantidade: 1 }];
@@ -59,9 +53,7 @@ function Loja() {
     setCarrinho((atual) =>
       atual
         .map((i) =>
-          i.produto.id === id
-            ? { ...i, quantidade: Math.min(20, i.quantidade + delta) }
-            : i,
+          i.produto.id === id ? { ...i, quantidade: Math.min(20, i.quantidade + delta) } : i,
         )
         .filter((i) => i.quantidade > 0),
     );
@@ -97,34 +89,29 @@ function Loja() {
 
   return (
     <main className="relative mx-auto max-w-7xl overflow-hidden px-6 pb-24 pt-32">
-      <PixelDecor
-        items={[
-          { icon: PixelMouse, className: "right-[4%] top-[14%] w-[34px] h-[44px] text-neon-orange", duration: "10s", opacity: 0.24 },
-          { icon: PixelMolecule, className: "left-[3%] bottom-[10%] w-8 h-8 text-neon-cyan", duration: "12s", delay: "1.2s", drift: true },
-        ]}
-      />
       <h1 className="font-display text-4xl font-black">
         LOJA <span className="text-neon-orange">GEAR</span>
       </h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
-        Periféricos testados por quem joga de verdade. Pague no Pix ou cartão e
-        retire na loja em Guarapuava.
+        Periféricos testados por quem joga de verdade. Pague no Pix ou cartão e retire na loja em
+        Guarapuava.
       </p>
 
       <div className="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {produtos.map((p) => (
-            <ProductCard key={p.id} produto={p} onAdd={adicionar} />
+          {produtos.map((p, i) => (
+            <Reveal key={p.id} delay={i * 80}>
+              <ProductCard produto={p} onAdd={adicionar} />
+            </Reveal>
           ))}
         </div>
 
-        <aside className="glass-card h-fit space-y-6 p-8 lg:sticky lg:top-28">
+        <aside className="glass-panel h-fit space-y-6 p-8 lg:sticky lg:top-28">
           <h2 className="font-display text-lg font-bold">Seu carrinho</h2>
 
           {carrinho.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nenhum item ainda. Passe o mouse num produto e clique em
-              adicionar.
+              Nenhum item ainda. Passe o mouse num produto e clique em adicionar.
             </p>
           ) : (
             <ul className="space-y-4 text-sm">

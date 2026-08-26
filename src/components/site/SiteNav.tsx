@@ -2,12 +2,14 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
-const links = [
+const links: { to: "/" | "/loja"; hash?: string; label: string }[] = [
   { to: "/", label: "Início" },
-  { to: "/reservar", label: "Estações" },
+  { to: "/", hash: "experiencias", label: "Experiências" },
+  { to: "/", hash: "pacotes", label: "Pacotes" },
+  { to: "/", hash: "como-funciona", label: "Como funciona" },
+  { to: "/", hash: "localizacao", label: "Localização" },
   { to: "/loja", label: "Loja" },
-  { to: "/contato", label: "Contato" },
-] as const;
+];
 
 export function SiteNav() {
   const [aberto, setAberto] = useState(false);
@@ -22,8 +24,10 @@ export function SiteNav() {
 
   return (
     <nav
-      className={`fixed inset-x-0 top-0 z-50 border-b border-border backdrop-blur-md transition-shadow ${
-        scrolled ? "bg-background/90 shadow-[0_4px_30px_rgba(0,0,0,0.6)]" : "bg-background/70"
+      className={`fixed inset-x-0 top-0 z-50 border-b transition-all ${
+        scrolled
+          ? "border-border bg-background/85 shadow-[0_4px_30px_rgba(0,0,0,0.6)] backdrop-blur-md"
+          : "border-transparent bg-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -35,10 +39,12 @@ export function SiteNav() {
         <div className="hidden gap-8 text-sm font-medium uppercase tracking-widest md:flex">
           {links.map((l) => (
             <Link
-              key={l.to}
+              key={l.label}
               to={l.to}
+              {...(l.hash ? { hash: l.hash } : {})}
               className="text-muted-foreground transition-colors hover:text-neon-cyan"
               activeProps={{ className: "text-foreground" }}
+              activeOptions={{ exact: true, includeHash: false }}
             >
               {l.label}
             </Link>
@@ -54,7 +60,8 @@ export function SiteNav() {
           </Link>
           <button
             type="button"
-            aria-label="Abrir menu"
+            aria-label={aberto ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={aberto}
             onClick={() => setAberto((v) => !v)}
             className="text-foreground md:hidden"
           >
@@ -68,8 +75,9 @@ export function SiteNav() {
           <div className="flex flex-col gap-4 text-sm font-medium uppercase tracking-widest">
             {links.map((l) => (
               <Link
-                key={l.to}
+                key={l.label}
                 to={l.to}
+                {...(l.hash ? { hash: l.hash } : {})}
                 onClick={() => setAberto(false)}
                 className="text-muted-foreground transition-colors hover:text-neon-cyan"
               >

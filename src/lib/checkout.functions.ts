@@ -49,10 +49,7 @@ async function criarPreferencia(params: {
 
   // O Mercado Pago exige URLs públicas (https). Em localhost, omitimos
   // back_urls/notification_url para o checkout ainda funcionar em teste.
-  const publico =
-    params.origin.startsWith("https://") && !params.origin.includes("localhost");
-
-
+  const publico = params.origin.startsWith("https://") && !params.origin.includes("localhost");
 
   const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
     method: "POST",
@@ -79,7 +76,6 @@ async function criarPreferencia(params: {
         : {}),
     }),
   });
-
 
   const payload = (await response.json()) as {
     id?: string;
@@ -110,7 +106,6 @@ function getOrigin() {
   if (origin?.startsWith("https://")) return origin;
   return new URL(request.url).origin;
 }
-
 
 export const criarPagamentoReserva = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => reservaSchema.parse(input))

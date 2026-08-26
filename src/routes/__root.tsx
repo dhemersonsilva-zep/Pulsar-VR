@@ -14,7 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { WhatsappFab } from "@/components/site/WhatsappFab";
-
+import { CustomCursor } from "@/components/site/CustomCursor";
+import { BUSINESS } from "@/lib/pulsar-data";
 
 function NotFoundComponent() {
   return (
@@ -81,19 +82,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pulsar VR | Gamer House em Guarapuava" },
+      { title: "Pulsar VR — Experiências Gamer Imersivas" },
       {
         name: "description",
         content:
-          "Reserve estações de VR, PS5 e PC Gamer na Pulsar VR e compre acessórios gamers.",
+          "Arena gamer em Guarapuava/PR: reserve estações de Realidade Virtual, PS5 e PC Gamer por hora, pague via Pix e viva uma experiência imersiva de verdade.",
       },
-      { property: "og:title", content: "Pulsar VR | Gamer House em Guarapuava" },
+      { property: "og:title", content: "Pulsar VR — Experiências Gamer Imersivas" },
       {
         property: "og:description",
-        content:
-          "Reserve estações de VR, PS5 e PC Gamer na Pulsar VR e compre acessórios gamers.",
+        content: "Reserve VR, PS5 e PC Gamer por hora em Guarapuava/PR. Pagamento via Pix.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -120,7 +121,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
@@ -135,11 +135,30 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const LOCAL_BUSINESS_JSONLD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: BUSINESS.nome,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: BUSINESS.cidade,
+    addressRegion: BUSINESS.estado,
+    addressCountry: "BR",
+  },
+  telephone: BUSINESS.telefoneExibicao,
+  sameAs: [BUSINESS.instagramUrl],
+});
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: LOCAL_BUSINESS_JSONLD }}
+      />
+      <CustomCursor />
       <SiteNav />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
@@ -148,4 +167,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
