@@ -3,6 +3,7 @@ import { Hero } from "@/components/site/sections/Hero";
 import { ExperienceSection } from "@/components/site/sections/ExperienceSection";
 import { HowItWorks } from "@/components/site/sections/HowItWorks";
 import { PackagesSection } from "@/components/site/sections/PackagesSection";
+import { CreditosSection } from "@/components/site/sections/CreditosSection";
 import { SquadSection } from "@/components/site/sections/SquadSection";
 import { TodaySection } from "@/components/site/sections/TodaySection";
 import { GallerySection } from "@/components/site/sections/GallerySection";
@@ -42,6 +43,7 @@ function Index() {
       <ExperienceSection />
       <HowItWorks />
       <PackagesSection />
+      <CreditosSection />
       <SquadSection />
       <TodaySection />
       <GallerySection />

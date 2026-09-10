@@ -6,6 +6,7 @@ const links: { to: "/" | "/loja"; hash?: string; label: string }[] = [
   { to: "/", label: "Início" },
   { to: "/", hash: "experiencias", label: "Experiências" },
   { to: "/", hash: "pacotes", label: "Pacotes" },
+  { to: "/", hash: "creditos", label: "Créditos" },
   { to: "/", hash: "como-funciona", label: "Como funciona" },
   { to: "/", hash: "localizacao", label: "Localização" },
   { to: "/loja", label: "Loja" },
@@ -36,7 +37,7 @@ export function SiteNav() {
           <span className="text-foreground"> VR</span>
         </Link>
 
-        <div className="hidden gap-8 text-sm font-medium uppercase tracking-widest md:flex">
+        <div className="hidden gap-5 text-sm font-medium uppercase tracking-widest md:flex lg:gap-8">
           {links.map((l) => (
             <Link
               key={l.label}

@@ -226,3 +226,134 @@ export const horarios = [
   "22:00",
   "23:00",
 ];
+
+/* --- Pulsar Créditos (programa de fidelidade) --- */
+
+/** Cada real gasto na Pulsar vira 1 crédito. */
+export const CREDITOS_POR_REAL = 1;
+
+/** Por quantos dias um crédito continua válido antes de expirar. */
+export const CREDITOS_VALIDADE_DIAS = 30;
+
+/** A partir de quantas pessoas a reserva conta como grupo. */
+export const CREDITOS_GRUPO_MINIMO = 3;
+
+/** Multiplicador de créditos numa reserva de grupo. */
+export const CREDITOS_MULTIPLICADOR_GRUPO = 1.5;
+
+export type Recompensa = {
+  id: string;
+  /** Quantos créditos a troca custa. Como 1 crédito = R$ 1, também é o gasto. */
+  creditos: number;
+  titulo: string;
+  detalhe: string;
+  /** Horas de jogo que a troca dá. 0 quando a recompensa não é tempo de jogo. */
+  horasGratis: number;
+  /** Estações válidas para a troca; `null` = qualquer uma. */
+  estacoesIds: string[] | null;
+  /** Preenchido só nas trocas que são desconto em vez de tempo de jogo. */
+  descontoPercent?: number;
+  accent: "cyan" | "pink" | "purple" | "green" | "orange";
+  destaque?: boolean;
+};
+
+/**
+ * Catálogo de trocas. Os créditos são acumulados e gastos aqui — não é uma
+ * escada cumulativa: quem troca 500 créditos por 3h consome os 500.
+ *
+ * PLACEHOLDER — os degraus (50/100/200/300/500/1000) e as recompensas vieram
+ * do dono; o retorno real de cada troca é calculado a partir dos preços de
+ * `stations`, então mexer no preço de uma estação reajusta os percentuais
+ * sozinho. Valide a margem antes de divulgar: as trocas devolvem entre 23% e
+ * 34% do que foi gasto (ver `retornoRecompensaPercent`).
+ */
+export const recompensas: Recompensa[] = [
+  {
+    id: "desconto",
+    creditos: 50,
+    titulo: "5% de desconto",
+    detalhe: "Abate 5% em qualquer reserva. A troca mais rápida pra quem não quer esperar.",
+    horasGratis: 0,
+    estacoesIds: null,
+    descontoPercent: 5,
+    accent: "cyan",
+  },
+  {
+    id: "meia-hora",
+    creditos: 100,
+    titulo: "30 min de jogo",
+    detalhe: "Meia hora grátis na estação que você escolher — VR, PS5 ou PC.",
+    horasGratis: 0.5,
+    estacoesIds: null,
+    accent: "cyan",
+  },
+  {
+    id: "hora-console",
+    creditos: 200,
+    titulo: "1h de PS5 ou PC",
+    detalhe: "Uma hora inteira no PlayStation 5 ou no PC Gamer Pro.",
+    horasGratis: 1,
+    estacoesIds: ["ps5", "pc"],
+    accent: "pink",
+  },
+  {
+    id: "hora-vr",
+    creditos: 300,
+    titulo: "1h de Realidade Virtual",
+    detalhe: "Uma hora no Meta Quest 3, a estação mais cara da casa.",
+    horasGratis: 1,
+    estacoesIds: ["vr"],
+    accent: "pink",
+  },
+  {
+    id: "tres-horas",
+    creditos: 500,
+    titulo: "3h de jogo",
+    detalhe: "Uma tarde inteira, na estação que quiser. É a troca que mais rende por crédito.",
+    horasGratis: 3,
+    estacoesIds: null,
+    accent: "purple",
+    destaque: true,
+  },
+  {
+    id: "evento",
+    creditos: 1000,
+    titulo: "Benefício especial + evento",
+    detalhe: "Convite para um evento fechado da Pulsar e o benefício exclusivo do mês.",
+    horasGratis: 0,
+    estacoesIds: null,
+    accent: "orange",
+  },
+];
+
+/** Preço/hora médio entre as estações válidas para uma troca. */
+export function precoHoraMedioEstacoes(ids: string[] | null) {
+  const lista = ids ? stations.filter((s) => ids.includes(s.id)) : stations;
+  const alvo = lista.length > 0 ? lista : stations;
+  return alvo.reduce((acc, s) => acc + s.precoHora, 0) / alvo.length;
+}
+
+/** Quanto a recompensa vale em reais, aos preços atuais das estações. */
+export function valorRecompensa(recompensa: Recompensa) {
+  return recompensa.horasGratis * precoHoraMedioEstacoes(recompensa.estacoesIds);
+}
+
+/**
+ * Quanto do gasto volta como jogo grátis, em %. Como 1 crédito = R$ 1, o
+ * percentual é direto: R$ 169,70 em jogo por 500 créditos = 34% de volta.
+ */
+export function retornoRecompensaPercent(recompensa: Recompensa) {
+  if (recompensa.creditos <= 0) return 0;
+  return Math.round((valorRecompensa(recompensa) / recompensa.creditos) * 100);
+}
+
+/** A troca com o melhor retorno por crédito — destacada na seção. */
+export function melhorRetornoPercent() {
+  return Math.max(...recompensas.map(retornoRecompensaPercent));
+}
+
+/** Quantos créditos uma reserva rende, já com o bônus de grupo. */
+export function creditosDaReserva(valor: number, pessoas: number) {
+  const multiplicador = pessoas >= CREDITOS_GRUPO_MINIMO ? CREDITOS_MULTIPLICADOR_GRUPO : 1;
+  return Math.floor(valor * CREDITOS_POR_REAL * multiplicador);
+}
