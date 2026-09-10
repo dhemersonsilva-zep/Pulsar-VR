@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { GrupoLinkPicker, type GrupoSelecionado } from "@/components/site/GrupoLinkPicker";
 import { criarPagamentoReserva } from "@/lib/checkout.functions";
 import { getDisponibilidadeDia, type StatusHorario } from "@/lib/disponibilidade.functions";
-import { horarios, precoBRL, stations, whatsappLink } from "@/lib/pulsar-data";
+import { horarios, jogosPorEstacao, precoBRL, stations, whatsappLink } from "@/lib/pulsar-data";
 
 export const Route = createFileRoute("/reservar")({
   validateSearch: (search: Record<string, unknown>): { estacao?: string } => {
@@ -64,6 +64,8 @@ function Reservar() {
   const [hora, setHora] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
+  // Opcional: alimenta as estatísticas de "jogo mais jogado" no HUB Pulsar.
+  const [jogo, setJogo] = useState<string | null>(null);
   const [grupo, setGrupo] = useState<GrupoSelecionado | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
@@ -71,6 +73,9 @@ function Reservar() {
   const station = stations.find((s) => s.id === stationId) ?? padrao;
   const data = diaSelecionado ? dataISO(diaSelecionado) : "";
   const total = station.precoHora * duracao * pessoas;
+  const jogosDaEstacao = jogosPorEstacao[station.id] ?? [];
+  // Trocar de estação invalida o jogo escolhido para a anterior.
+  const jogoValido = jogo && jogosDaEstacao.includes(jogo) ? jogo : null;
 
   const buscarDisponibilidade = useServerFn(getDisponibilidadeDia);
   const { data: disponibilidade, isLoading: carregandoHorarios } = useQuery({
@@ -107,6 +112,7 @@ function Reservar() {
           duracao,
           pessoas,
           totalCentavos: Math.round(total * 100),
+          ...(jogoValido ? { jogo: jogoValido } : {}),
           ...(grupo ? { grupoId: grupo.id } : {}),
         },
       });
@@ -338,6 +344,35 @@ function Reservar() {
                 className="w-full border border-input bg-card p-3 text-sm outline-none focus:border-neon-cyan"
               />
             </div>
+
+            {jogosDaEstacao.length > 0 && (
+              <div>
+                <span className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">
+                  Já sabe o que vai jogar? (opcional)
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {jogosDaEstacao.map((j) => (
+                    <button
+                      key={j}
+                      type="button"
+                      onClick={() => setJogo((atual) => (atual === j ? null : j))}
+                      aria-pressed={jogoValido === j}
+                      className={`border px-3 py-2 text-xs transition-all ${
+                        jogoValido === j
+                          ? "border-neon-pink bg-neon-pink/15 text-neon-pink"
+                          : "border-border text-muted-foreground hover:border-neon-pink/50"
+                      }`}
+                    >
+                      {j}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Serve pras estatísticas do seu império no HUB. Dá pra mudar na hora, sem
+                  compromisso.
+                </p>
+              </div>
+            )}
 
             <div>
               <span className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">

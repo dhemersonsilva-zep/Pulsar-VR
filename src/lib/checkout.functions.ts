@@ -12,6 +12,8 @@ const reservaSchema = z.object({
   duracao: z.number().int().min(1).max(6),
   pessoas: z.number().int().min(1).max(8),
   totalCentavos: z.number().int().min(100).max(500000),
+  /** Opcional — alimenta as estatísticas de jogo do HUB Pulsar. */
+  jogo: z.string().trim().min(1).max(60).optional(),
   grupoId: z.string().uuid().optional(),
 });
 
@@ -111,7 +113,11 @@ function getOrigin() {
 export const criarPagamentoReserva = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => reservaSchema.parse(input))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // `jogo` foi criado em 20260910120000_hub_pulsar.sql e ainda não existe no
+    // types.ts gerado — usamos o mesmo client service-role, só que tipado com
+    // as colunas novas. Some quando o types.ts for regerado.
+    const { hubDb } = await import("@/integrations/supabase/hub-types");
+    const supabaseAdmin = await hubDb();
 
     const { data: reserva, error } = await supabaseAdmin
       .from("reservas")
@@ -125,6 +131,10 @@ export const criarPagamentoReserva = createServerFn({ method: "POST" })
         duracao_horas: data.duracao,
         pessoas: data.pessoas,
         total_centavos: data.totalCentavos,
+        // Só entra no insert quando o cliente escolheu um jogo. Sem isso, uma
+        // reserva feita antes da migration do HUB ser aplicada falharia por
+        // causa de uma coluna inexistente — e reserva quebrada é inaceitável.
+        ...(data.jogo ? { jogo: data.jogo } : {}),
         grupo_id: data.grupoId ?? null,
       })
       .select("id")

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, Rocket, X } from "lucide-react";
 
 const links: { to: "/" | "/loja"; hash?: string; label: string }[] = [
   { to: "/", label: "Início" },
@@ -53,6 +53,17 @@ export function SiteNav() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Área pessoal: fica no cluster da direita, junto do CTA, em vez de
+              disputar espaço com a navegação do site. */}
+          <Link
+            to="/hub"
+            aria-label="Meu Império"
+            className="hidden items-center gap-1.5 border border-neon-purple/50 px-3 py-2 font-display text-xs font-bold uppercase tracking-widest text-neon-purple transition-all hover:bg-neon-purple/10 md:inline-flex lg:px-4"
+          >
+            <Rocket className="size-3.5" />
+            {/* Só o ícone em telas médias, onde a navegação já está apertada. */}
+            <span className="hidden lg:inline">Meu Império</span>
+          </Link>
           <Link
             to="/reservar"
             className="btn-skew hidden bg-neon-cyan px-6 py-2 font-display text-xs font-bold text-primary-foreground transition-all hover:brightness-110 md:inline-block"
@@ -85,6 +96,14 @@ export function SiteNav() {
                 {l.label}
               </Link>
             ))}
+            <Link
+              to="/hub"
+              onClick={() => setAberto(false)}
+              className="flex items-center gap-2 text-neon-purple transition-colors hover:brightness-110"
+            >
+              <Rocket className="size-4" />
+              Meu Império
+            </Link>
             <Link
               to="/reservar"
               onClick={() => setAberto(false)}
