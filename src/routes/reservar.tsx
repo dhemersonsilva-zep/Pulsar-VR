@@ -84,6 +84,7 @@ function Reservar() {
     isError: erroHorarios,
     refetch: recarregarHorarios,
     isFetching: buscandoHorarios,
+    error: erroDetalhe,
   } = useQuery({
     queryKey: ["disponibilidade", data],
     queryFn: () => buscarDisponibilidade({ data: { data } }),
@@ -319,6 +320,11 @@ function Reservar() {
                     Reservar no WhatsApp
                   </a>
                 </div>
+                {erroDetalhe instanceof Error && (
+                  <p className="font-mono text-[10px] text-muted-foreground">
+                    {erroDetalhe.message}
+                  </p>
+                )}
               </div>
             )}
 

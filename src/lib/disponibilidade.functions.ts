@@ -32,7 +32,10 @@ export const getDisponibilidadeDia = createServerFn({ method: "GET" })
       // caminho direto para reserva duplicada. Melhor a tela dizer que não
       // conseguiu carregar do que inventar disponibilidade.
       console.error("Erro ao consultar disponibilidade", error);
-      throw new Error("Não foi possível consultar os horários agora.");
+      // O código vai junto para a tela poder exibi-lo: é o que permite
+      // diagnosticar sem acesso ao log da função.
+      const codigo = error.code ? ` [${error.code}]` : "";
+      throw new Error(`Não foi possível consultar os horários agora.${codigo}`);
     }
 
     const ocupacao = new Map<string, number>();

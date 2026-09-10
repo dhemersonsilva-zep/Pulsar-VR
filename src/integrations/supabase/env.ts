@@ -14,14 +14,32 @@
  * seja fatal.
  */
 
-/** Tira espaços, aspas, colchetes, parênteses e chaves das pontas. */
+/**
+ * Tira invólucros de copiar/colar. Trata o link markdown `[x](y)` ANTES de
+ * aparar as pontas: aparar sozinho deixaria `x](y`, que continua quebrado —
+ * foi exatamente o que aconteceu com a SUPABASE_URL em produção.
+ */
 export function limparEnv(valor: string | undefined): string | undefined {
   if (typeof valor !== "string") return valor;
-  const limpo = valor
-    .trim()
+
+  let v = valor.trim();
+
+  // [texto](destino) -> texto. Quem cola de um chat costuma trazer os dois
+  // lados iguais; ficamos com o primeiro.
+  const markdown = v.match(/^\[([^\]]+)\]\(([^)]*)\)$/);
+  if (markdown?.[1]) v = markdown[1].trim();
+
+  const limpo = v
     .replace(/^[[({<"'`]+/, "")
     .replace(/[\])}>"'`]+$/, "")
     .trim();
+
+  if (limpo && limpo !== valor.trim()) {
+    console.warn(
+      "[Supabase] Uma variável de ambiente veio com invólucro de colagem e foi corrigida em tempo de execução. Ajuste o valor — isto é um remendo.",
+    );
+  }
+
   return limpo.length > 0 ? limpo : undefined;
 }
 
