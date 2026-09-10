@@ -298,7 +298,7 @@ export const recompensas: Recompensa[] = [
   },
   {
     id: "hora-vr",
-    creditos: 300,
+    creditos: 250,
     titulo: "1h de Realidade Virtual",
     detalhe: "Uma hora no Meta Quest 3, a estação mais cara da casa.",
     horasGratis: 1,
