@@ -1,1 +1,5 @@
-project_id = "zjrwcameqrpigurynzfk"
+# Projeto de PRODUCAO, confirmado no bundle publicado em pulsar-vr.vercel.app
+# (VITE_SUPABASE_URL embutido no cliente) e pelo fluxo de reservas funcionando
+# contra ele. O valor anterior, zjrwcameqrpigurynzfk, era de um projeto antigo
+# e fazia `supabase db push` mirar no lugar errado.
+project_id = "yxqtllcdqafhtkbeylxz"
