@@ -4,7 +4,7 @@ Site da Pulsar VR — arena gamer com VR, PS5 e PC Gamer em Guarapuava/PR. Reser
 
 ## Deploy
 
-Hospedado na [Netlify](https://www.netlify.com/), com deploy automático a cada push na branch `master` deste repositório (veja `netlify.toml`).
+Hospedado na [Vercel](https://vercel.com/), com deploy automático a cada push na branch `master` deste repositório (veja `vercel.json`).
 
 ## Desenvolvimento
 
