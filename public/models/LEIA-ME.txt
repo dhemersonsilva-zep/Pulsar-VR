@@ -1,0 +1,34 @@
+NAVE 3D DO HUB PULSAR
+=====================
+
+Coloque aqui um arquivo chamado exatamente:
+
+    nave-pulsar.glb
+
+Assim que o arquivo existir, o HUB passa a carregá-lo automaticamente no
+lugar da nave procedural que vem por padrao. Nenhuma alteracao de codigo e
+necessaria — o caminho lido e /models/nave-pulsar.glb.
+
+REQUISITOS DO ARQUIVO
+---------------------
+- Formato .glb (binario). .gltf com arquivos soltos NAO e suportado.
+- Ate ~3 MB. Acima disso o carregamento no celular fica ruim.
+- Escala livre: a nave e reenquadrada automaticamente para caber na cena.
+- Orientacao ideal: nariz apontando para -Z.
+- Compressao Draco e suportada. O decodificador vem junto do three e e
+  servido pelo proprio dominio do site — nao usa CDN, nao precisa copiar nada.
+- Meshopt NAO esta habilitado. Se seu modelo usar Meshopt, exporte sem ele.
+
+LICENCA — LEIA ANTES DE USAR
+----------------------------
+Use SOMENTE modelos cuja licenca permita uso comercial. A Pulsar VR e um
+negocio, entao "somente uso pessoal" ou "somente uso nao-comercial" NAO
+serve. Fontes com licenca clara:
+
+- Poly Haven (CC0, uso comercial livre, sem atribuicao)
+- Kenney.nl (CC0)
+- Quaternius (CC0)
+- Sketchfab, filtrando por "Downloadable" + licenca CC0 ou CC-BY
+  (CC-BY exige creditar o autor em algum lugar do site)
+
+Guarde o link e a licenca do modelo que voce escolher.

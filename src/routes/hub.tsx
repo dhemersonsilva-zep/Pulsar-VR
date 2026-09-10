@@ -4,7 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { LogOut, Trophy } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { NavePulsar, ZONAS, type ZonaId } from "@/components/site/hub/NavePulsar";
+import { ZONAS, type ZonaId } from "@/components/site/hub/NavePulsar";
+import { Nave3D } from "@/components/site/hub/Nave3D";
 import { AcessoHub } from "@/components/site/hub/AcessoHub";
 import { conteudoDaZona, type HubDados, type LinhaRanking } from "@/components/site/hub/PaineisHub";
 import { carregarHub, listarRankingJogadores, sairDoHub } from "@/lib/hub.functions";
@@ -84,11 +85,24 @@ function Hub() {
     return (
       <main className="mx-auto max-w-2xl px-6 pb-24 pt-32">
         <div className="glass-panel p-8 text-center">
-          <h1 className="font-display text-2xl font-black">NAVE INDISPONÍVEL</h1>
+          <h1 className="font-display text-2xl font-black text-neon-orange">SEM SINAL DO BANCO</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Não conseguimos falar com o servidor do HUB. Se isso acabou de ser publicado, a migração
-            do banco (<code className="text-foreground">20260910120000_hub_pulsar.sql</code>) ainda
-            pode não ter sido aplicada.
+            Isto <strong>não</strong> é um problema da nave 3D — é o servidor do HUB que não
+            respondeu. As duas causas possíveis:
+          </p>
+          <ul className="mx-auto mt-4 max-w-md list-disc space-y-1.5 pl-5 text-left text-sm text-muted-foreground">
+            <li>
+              A migração <code className="text-foreground">20260910120000_hub_pulsar.sql</code>{" "}
+              ainda não foi aplicada no Supabase.
+            </li>
+            <li>
+              As variáveis <code className="text-foreground">SUPABASE_URL</code> /{" "}
+              <code className="text-foreground">SUPABASE_PUBLISHABLE_KEY</code> não estão
+              configuradas neste ambiente.
+            </li>
+          </ul>
+          <p className="mt-4 text-xs text-muted-foreground">
+            O erro exato está no console do navegador.
           </p>
         </div>
       </main>
@@ -170,16 +184,13 @@ function Hub() {
           </div>
         </div>
 
-        {/* A nave */}
-        <div className="mx-auto max-w-3xl">
-          <NavePulsar onSelecionar={setZona} destaques={destaques} />
+        {/* A nave — elemento central da tela, em toda a largura disponível */}
+        <div className="mx-auto max-w-4xl">
+          <Nave3D onSelecionar={setZona} destaques={destaques} pausado={zona !== null} />
         </div>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground lg:hidden">
-          Toque em uma área da nave — ou escolha abaixo.
-        </p>
-        <p className="mt-4 hidden text-center text-xs text-muted-foreground lg:block">
-          Passe o mouse pelas áreas da nave e clique para abrir o painel.
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Toque nos pontos luminosos da nave para abrir cada área — ou use os atalhos abaixo.
         </p>
 
         {/* Acesso alternativo — é o layout principal no celular */}
