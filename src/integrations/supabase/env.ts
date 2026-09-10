@@ -30,12 +30,26 @@ export function limparEnv(valor: string | undefined): string | undefined {
  * precisou consertar, para o problema não ficar invisível.
  */
 export function limparUrlSupabase(valor: string | undefined): string | undefined {
-  const limpo = limparEnv(valor);
-  if (!limpo) return undefined;
+  if (typeof valor !== "string") return valor;
+  const original = valor.trim();
+  if (!original) return undefined;
 
-  if (limpo !== valor?.trim()) {
+  // Extrai a PRIMEIRA URL http(s) de dentro do texto, em vez de só aparar as
+  // pontas. É o que resolve o caso real: a variável foi salva como link
+  // markdown completo, `[https://x.supabase.co](https://x.supabase.co)` —
+  // aparar as pontas deixaria `https://x.supabase.co](https://x.supabase.co`,
+  // que continua inválido.
+  const achado = original.match(/https?:\/\/[^\s\]()<>"'`,]+/i)?.[0];
+  const limpo = (achado ?? limparEnv(original) ?? "").replace(/\/+$/, "");
+
+  if (!limpo) {
+    console.error("[Supabase] SUPABASE_URL está vazia ou ilegível.");
+    return undefined;
+  }
+
+  if (limpo !== original) {
     console.warn(
-      `[Supabase] SUPABASE_URL tinha caracteres extras nas pontas e foi corrigida em tempo de execução. Ajuste a variável de ambiente para "${limpo}".`,
+      `[Supabase] SUPABASE_URL veio com conteúdo extra e foi corrigida em tempo de execução para "${limpo}". Ajuste a variável de ambiente — isto é um remendo, não a solução.`,
     );
   }
 

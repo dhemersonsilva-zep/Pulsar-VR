@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { limparUrlSupabase } from "@/integrations/supabase/env";
 
 // DIAGNOSTICO TEMPORARIO — removido logo apos a leitura.
 // Exige token e nunca devolve valor de segredo, so booleanos e codigo de erro.
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/api/public/diag")({
           SUPABASE_PUBLISHABLE_KEY: Boolean(process.env["SUPABASE_PUBLISHABLE_KEY"]),
           // So o host, para saber QUAL projeto a producao usa. Nao e segredo:
           // o mesmo valor ja vai embutido no bundle do navegador.
-          host: (process.env["SUPABASE_URL"] ?? "").replace(/^https?:\/\//, "").split(".")[0],
+          urlBruta: (process.env["SUPABASE_URL"] ?? "").slice(0, 90),
+          urlSaneada: limparUrlSupabase(process.env["SUPABASE_URL"]) ?? null,
         };
 
         const tabelas: Record<string, string> = {};
