@@ -27,8 +27,12 @@ export const getDisponibilidadeDia = createServerFn({ method: "GET" })
       .not("status", "in", "(cancelado,recusado)");
 
     if (error) {
+      // NÃO engolir: devolver {} fazia a UI tratar ausência de dado como vaga
+      // livre e anunciar a agenda inteira disponível com o banco fora do ar —
+      // caminho direto para reserva duplicada. Melhor a tela dizer que não
+      // conseguiu carregar do que inventar disponibilidade.
       console.error("Erro ao consultar disponibilidade", error);
-      return {};
+      throw new Error("Não foi possível consultar os horários agora.");
     }
 
     const ocupacao = new Map<string, number>();

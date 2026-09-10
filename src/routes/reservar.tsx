@@ -78,20 +78,29 @@ function Reservar() {
   const jogoValido = jogo && jogosDaEstacao.includes(jogo) ? jogo : null;
 
   const buscarDisponibilidade = useServerFn(getDisponibilidadeDia);
-  const { data: disponibilidade, isLoading: carregandoHorarios } = useQuery({
+  const {
+    data: disponibilidade,
+    isLoading: carregandoHorarios,
+    isError: erroHorarios,
+    refetch: recarregarHorarios,
+    isFetching: buscandoHorarios,
+  } = useQuery({
     queryKey: ["disponibilidade", data],
     queryFn: () => buscarDisponibilidade({ data: { data } }),
     enabled: passo === 3 && !!data,
+    retry: 1,
   });
 
   const pagar = useServerFn(criarPagamentoReserva);
 
   const podeAvancar = useMemo(() => {
     if (passo === 2) return !!diaSelecionado;
-    if (passo === 3) return !!hora;
+    // Sem agenda confirmada não deixamos seguir para o pagamento, mesmo que
+    // um horário já estivesse selecionado antes da falha.
+    if (passo === 3) return !!hora && !erroHorarios;
     if (passo === 4) return nome.trim().length >= 2 && telefone.trim().length >= 8;
     return true;
-  }, [passo, diaSelecionado, hora, nome, telefone]);
+  }, [passo, diaSelecionado, hora, nome, telefone, erroHorarios]);
 
   async function pagarReserva() {
     setErro(null);
@@ -274,7 +283,46 @@ function Reservar() {
             {data && carregandoHorarios && (
               <p className="text-sm text-muted-foreground">Carregando horários…</p>
             )}
-            {data && !carregandoHorarios && (
+
+            {/* Sem disponibilidade confirmada não mostramos horário nenhum:
+                exibir tudo como livre já causou anúncio de agenda vazia com o
+                banco fora do ar. */}
+            {data && erroHorarios && (
+              <div className="flex flex-col items-start gap-4 border border-destructive/50 bg-destructive/10 p-5">
+                <div>
+                  <p className="font-display text-sm font-bold">
+                    NÃO CONSEGUIMOS CARREGAR OS HORÁRIOS
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Sem confirmar a agenda, preferimos não mostrar horários a mostrar um que já
+                    esteja ocupado. Tente de novo em instantes — ou fale com a gente no WhatsApp que
+                    confirmamos na hora.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    disabled={buscandoHorarios}
+                    onClick={() => void recarregarHorarios()}
+                    className="border border-border px-5 py-2.5 font-display text-xs font-bold uppercase tracking-widest transition-colors hover:border-neon-cyan hover:text-neon-cyan disabled:opacity-50"
+                  >
+                    {buscandoHorarios ? "Tentando…" : "Tentar de novo"}
+                  </button>
+                  <a
+                    href={whatsappLink(
+                      `Olá! Quero reservar ${station.nome} na Pulsar VR em ${dataBR(data)}, mas o site não carregou os horários.`,
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="border border-whatsapp/60 px-5 py-2.5 font-display text-xs font-bold uppercase tracking-widest text-whatsapp transition-colors hover:bg-whatsapp/10"
+                  >
+                    Reservar no WhatsApp
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {data && !carregandoHorarios && !erroHorarios && (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {horarios.map((h) => {
                   const status = disponibilidade?.[station.id]?.[h] ?? "disponivel";
