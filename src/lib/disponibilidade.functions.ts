@@ -35,7 +35,10 @@ export const getDisponibilidadeDia = createServerFn({ method: "GET" })
       // O código vai junto para a tela poder exibi-lo: é o que permite
       // diagnosticar sem acesso ao log da função.
       const codigo = error.code ? ` [${error.code}]` : "";
-      throw new Error(`Não foi possível consultar os horários agora.${codigo}`);
+      // Nome de coluna/tabela não é segredo, e sem o log da função é a única
+      // forma de saber o que o banco recusou.
+      const detalhe = error.message ? ` ${error.message.slice(0, 120)}` : "";
+      throw new Error(`Não foi possível consultar os horários agora.${codigo}${detalhe}`);
     }
 
     const ocupacao = new Map<string, number>();
