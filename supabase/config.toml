@@ -1,5 +1,9 @@
-# Projeto de PRODUCAO, confirmado no bundle publicado em pulsar-vr.vercel.app
-# (VITE_SUPABASE_URL embutido no cliente) e pelo fluxo de reservas funcionando
-# contra ele. O valor anterior, zjrwcameqrpigurynzfk, era de um projeto antigo
-# e fazia `supabase db push` mirar no lugar errado.
-project_id = "yxqtllcdqafhtkbeylxz"
+# Projeto de PRODUCAO. Confirmado com o dono em 10/09/2026: e neste banco que
+# as migrations foram aplicadas e e para ele que a Vercel deve apontar.
+#
+# Houve um periodo em que a producao apontava para yxqtllcdqafhtkbeylxz, um
+# projeto vazio cujas tabelas eram esqueletos (reservas so com
+# id/status/created_at). Se voltar a aparecer erro
+# "[42703] column reservas.estacao_id does not exist", e sinal de que a
+# SUPABASE_URL da Vercel escorregou para aquele projeto de novo.
+project_id = "zjrwcameqrpigurynzfk"
