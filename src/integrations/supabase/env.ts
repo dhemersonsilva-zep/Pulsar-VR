@@ -44,6 +44,33 @@ export function limparEnv(valor: string | undefined): string | undefined {
 }
 
 /**
+ * Primeiro valor utilizável da lista, já saneado.
+ *
+ * Serve para dar precedência às variáveis `PULSAR_*` sobre as padrão. Motivo:
+ * em 11/09/2026 a produção apontava para um projeto Supabase vazio e editar
+ * `SUPABASE_URL` na Vercel não surtia efeito — build novo continuava
+ * compilando a URL antiga, comportamento típico de integração que reinjeta as
+ * próprias variáveis a cada deploy. Como `PULSAR_SUPABASE_URL` não pertence a
+ * nenhuma integração, ela sobrevive e vence.
+ */
+export function primeiroEnv(...valores: (string | undefined)[]): string | undefined {
+  for (const v of valores) {
+    const limpo = limparEnv(v);
+    if (limpo) return limpo;
+  }
+  return undefined;
+}
+
+/** Igual a `primeiroEnv`, mas extraindo URL de dentro do texto. */
+export function primeiraUrlSupabase(...valores: (string | undefined)[]): string | undefined {
+  for (const v of valores) {
+    const limpo = limparUrlSupabase(v);
+    if (limpo) return limpo;
+  }
+  return undefined;
+}
+
+/**
  * Além de limpar, valida que sobrou uma URL http(s). Avisa no log quando
  * precisou consertar, para o problema não ficar invisível.
  */

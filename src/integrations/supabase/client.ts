@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 // NAO-GERADO: sanea env colada com colchete/aspas (ver env.ts). Reaplique se
 // este arquivo for regerado.
-import { limparEnv, limparUrlSupabase } from "./env";
+import { primeiraUrlSupabase, primeiroEnv } from "./env";
 import { brokeredPreviewStorage } from "./previewAuthStorage";
 
 function isNewSupabaseApiKey(value: string): boolean {
@@ -36,11 +36,17 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
   // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = limparUrlSupabase(
-    import.meta.env["VITE_SUPABASE_URL"] || process.env["SUPABASE_URL"],
+  const SUPABASE_URL = primeiraUrlSupabase(
+    import.meta.env["VITE_PULSAR_SUPABASE_URL"],
+    import.meta.env["VITE_SUPABASE_URL"],
+    process.env["PULSAR_SUPABASE_URL"],
+    process.env["SUPABASE_URL"],
   );
-  const SUPABASE_PUBLISHABLE_KEY = limparEnv(
-    import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] || process.env["SUPABASE_PUBLISHABLE_KEY"],
+  const SUPABASE_PUBLISHABLE_KEY = primeiroEnv(
+    import.meta.env["VITE_PULSAR_SUPABASE_PUBLISHABLE_KEY"],
+    import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"],
+    process.env["PULSAR_SUPABASE_PUBLISHABLE_KEY"],
+    process.env["SUPABASE_PUBLISHABLE_KEY"],
   );
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
