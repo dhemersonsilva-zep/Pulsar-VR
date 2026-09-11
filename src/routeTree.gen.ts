@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as HubRouteImport } from './routes/hub'
 import { Route as LojaRouteImport } from './routes/loja'
 import { Route as PagamentoRouteImport } from './routes/pagamento'
 import { Route as RankingRouteImport } from './routes/ranking'
@@ -29,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HubRoute = HubRouteImport.update({
+  id: '/hub',
+  path: '/hub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LojaRoute = LojaRouteImport.update({
@@ -81,6 +87,7 @@ const ApiPublicMercadopagoWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contato': typeof ContatoRoute
+  '/hub': typeof HubRoute
   '/loja': typeof LojaRoute
   '/pagamento': typeof PagamentoRoute
   '/ranking': typeof RankingRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contato': typeof ContatoRoute
+  '/hub': typeof HubRoute
   '/loja': typeof LojaRoute
   '/pagamento': typeof PagamentoRoute
   '/ranking': typeof RankingRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/contato': typeof ContatoRoute
+  '/hub': typeof HubRoute
   '/loja': typeof LojaRoute
   '/pagamento': typeof PagamentoRoute
   '/ranking': typeof RankingRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/contato'
+    | '/hub'
     | '/loja'
     | '/pagamento'
     | '/ranking'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/contato'
+    | '/hub'
     | '/loja'
     | '/pagamento'
     | '/ranking'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/contato'
+    | '/hub'
     | '/loja'
     | '/pagamento'
     | '/ranking'
@@ -163,6 +175,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContatoRoute: typeof ContatoRoute
+  HubRoute: typeof HubRoute
   LojaRoute: typeof LojaRoute
   PagamentoRoute: typeof PagamentoRoute
   RankingRoute: typeof RankingRoute
@@ -188,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hub': {
+      id: '/hub'
+      path: '/hub'
+      fullPath: '/hub'
+      preLoaderRoute: typeof HubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/loja': {
@@ -259,6 +279,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContatoRoute: ContatoRoute,
+  HubRoute: HubRoute,
   LojaRoute: LojaRoute,
   PagamentoRoute: PagamentoRoute,
   RankingRoute: RankingRoute,
