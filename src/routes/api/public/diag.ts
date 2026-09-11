@@ -1,40 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { limparUrlSupabase } from "@/integrations/supabase/env";
 
-// DIAGNOSTICO TEMPORARIO — removido apos a leitura. So nomes, nunca valores.
-// ?t=TOKEN&tabela=nome  -> verifica se a tabela existe no banco da producao.
+// DIAGNOSTICO TEMPORARIO — removido apos a leitura.
+// Lista NOMES de variaveis presentes; nunca valores.
 const TOKEN = "fd1a1e7982343951254486a0";
 
 export const Route = createFileRoute("/api/public/diag")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const url = new URL(request.url);
-        if (url.searchParams.get("t") !== TOKEN) {
+        if (new URL(request.url).searchParams.get("t") !== TOKEN) {
           return new Response("not found", { status: 404 });
         }
-        const alvo = (url.searchParams.get("tabela") ?? "reservas").replace(/[^a-z0-9_]/gi, "");
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const db = supabaseAdmin as never as {
-          from: (t: string) => {
-            select: (c: string) => {
-              limit: (n: number) => Promise<{ error: { message?: string } | null }>;
-            };
-          };
-        };
+        const nomes = Object.keys(process.env)
+          .filter((k) => /SUPABASE|PULSAR/i.test(k))
+          .sort();
 
-        const r = await db.from(alvo).select("id").limit(1);
-        const colunas = await db.from("reservas").select("estacao_id").limit(1);
+        const presentes: Record<string, boolean> = {};
+        for (const n of nomes) presentes[n] = Boolean(process.env[n]);
 
         return new Response(
           JSON.stringify(
             {
-              projetoEmUso: limparUrlSupabase(process.env["SUPABASE_URL"]) ?? null,
-              tabelaConsultada: alvo,
-              existe: !r.error,
-              erro: r.error?.message?.slice(0, 110) ?? null,
-              reservasTemEstacaoId: !colunas.error,
+              variaveisEncontradas: presentes,
+              PULSAR_SUPABASE_URL_definida: Boolean(process.env["PULSAR_SUPABASE_URL"]),
+              projetoEmUso: limparUrlSupabase(
+                process.env["PULSAR_SUPABASE_URL"] ?? process.env["SUPABASE_URL"],
+              ),
             },
             null,
             2,
